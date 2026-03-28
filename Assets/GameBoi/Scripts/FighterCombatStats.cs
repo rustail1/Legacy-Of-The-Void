@@ -35,6 +35,12 @@ public class FighterCombatStats : MonoBehaviour
     [SerializeField] private bool unlockedMoonSlash = true;
     [SerializeField] private bool unlockedVoidPalm = true;
 
+    private bool hasExternalStartOverrides;
+    private bool externalOverrideStartHp;
+    private int externalStartHp;
+    private bool externalOverrideStartQi;
+    private int externalStartQi;
+
     public MasterRank Rank => rank;
     public bool UseManualStats => useManualStats;
     public bool UseManualTechniqueTierRange => useManualTechniqueTierRange;
@@ -71,6 +77,45 @@ public class FighterCombatStats : MonoBehaviour
         ApplyRankPresetIfNeeded();
         CurrentHP = MaxHP;
         CurrentQi = MaxQi;
+
+        if (hasExternalStartOverrides)
+        {
+            if (externalOverrideStartHp)
+                CurrentHP = Mathf.Clamp(externalStartHp, 0, MaxHP);
+
+            if (externalOverrideStartQi)
+                CurrentQi = Mathf.Clamp(externalStartQi, 0, MaxQi);
+        }
+    }
+
+    public void ApplyExternalConfig(BattleFighterConfig config)
+    {
+        if (config == null)
+            return;
+
+        rank = config.rank;
+        useManualStats = config.useManualStats;
+
+        if (useManualStats)
+        {
+            bodyLevel = Mathf.Max(0, config.bodyLevel);
+            qiLevel = Mathf.Max(0, config.qiLevel);
+        }
+        else
+        {
+            ApplyRankPresetIfNeeded();
+        }
+
+        unlockedDragonFist = config.dragonFist;
+        unlockedCraneKick = config.craneKick;
+        unlockedMoonSlash = config.moonSlash;
+        unlockedVoidPalm = config.voidPalm;
+
+        hasExternalStartOverrides = config.overrideStartHp || config.overrideStartQi;
+        externalOverrideStartHp = config.overrideStartHp;
+        externalStartHp = config.startHp;
+        externalOverrideStartQi = config.overrideStartQi;
+        externalStartQi = config.startQi;
     }
 
     public void ApplyHp(int value)

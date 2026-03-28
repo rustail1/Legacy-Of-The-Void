@@ -14,9 +14,9 @@ public class BattleRules : ScriptableObject
     [Min(0)] public int shape3331Weight = 35;
 
     [Header("Smart Pair Weights")]
-    [Min(0)] public int pairSeriesWeight = 4;
-    [Min(0)] public int pairCounterEnemyWeight = 3;
-    [Min(0)] public int pairStyleWeight = 2;
+    [Min(0)] public int pairSeriesWeight = 3;
+    [Min(0)] public int pairCounterEnemyWeight = 2;
+    [Min(0)] public int pairStyleWeight = 1;
     [Min(0)] public int pairNeutralWeight = 1;
     [Range(0f, 1f)] public float pairSecondRandomChance = 0.25f;
 
@@ -25,10 +25,10 @@ public class BattleRules : ScriptableObject
     [Min(0)] public int minimumMeaningfulOffersInProtectedWindow = 2;
 
     [Header("Technique Qi Cost")]
-    [Min(0)] public int dragonFistQiCost = 8;
-    [Min(0)] public int craneKickQiCost = 12;
-    [Min(0)] public int moonSlashQiCost = 16;
-    [Min(0)] public int voidPalmQiCost = 24;
+    [Min(0)] public int dragonFistQiCost = 6;
+    [Min(0)] public int craneKickQiCost = 10;
+    [Min(0)] public int moonSlashQiCost = 14;
+    [Min(0)] public int voidPalmQiCost = 20;
 
     [Header("Technique Damage Multiplier")]
     [Min(0f)] public float dragonFistDamageMultiplier = 2f;

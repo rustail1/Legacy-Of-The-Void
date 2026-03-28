@@ -565,6 +565,7 @@ public class AutoBattleController : MonoBehaviour
 
         List<MoveType> candidateMoves = new List<MoveType>();
         List<int> candidateWeights = new List<int>();
+        bool hasDifferentTypeAlternative = false;
 
         for (int i = 0; i < playerRoundPool.Count; i++)
         {
@@ -572,6 +573,22 @@ public class AutoBattleController : MonoBehaviour
                 continue;
 
             MoveType candidate = playerRoundPool[i];
+            if (candidate != first)
+                hasDifferentTypeAlternative = true;
+        }
+
+        for (int i = 0; i < playerRoundPool.Count; i++)
+        {
+            if (i == firstIndex)
+                continue;
+
+            MoveType candidate = playerRoundPool[i];
+
+            // Better UX rule:
+            // avoid identical pairs like Hand/Hand unless there is literally no other type left.
+            if (hasDifferentTypeAlternative && candidate == first)
+                continue;
+
             if (mustGuaranteeMeaningful && !IsMeaningfulChoice(candidate) && !IsMeaningfulChoice(first))
                 continue;
 
@@ -582,7 +599,7 @@ public class AutoBattleController : MonoBehaviour
         MoveType second;
         if (candidateMoves.Count == 0)
         {
-            second = FindFallbackSecond(firstIndex, mustGuaranteeMeaningful);
+            second = FindFallbackSecond(firstIndex, mustGuaranteeMeaningful, first, hasDifferentTypeAlternative);
         }
         else
         {
@@ -600,7 +617,7 @@ public class AutoBattleController : MonoBehaviour
             meaningfulOffersShownInProtectedWindow++;
     }
 
-    private MoveType FindFallbackSecond(int excludedIndex, bool mustGuaranteeMeaningful)
+    private MoveType FindFallbackSecond(int excludedIndex, bool mustGuaranteeMeaningful, MoveType firstMove, bool hasDifferentTypeAlternative)
     {
         List<MoveType> fallback = new List<MoveType>();
         for (int i = 0; i < playerRoundPool.Count; i++)
@@ -609,12 +626,26 @@ public class AutoBattleController : MonoBehaviour
                 continue;
 
             MoveType move = playerRoundPool[i];
+
+            if (hasDifferentTypeAlternative && move == firstMove)
+                continue;
+
             if (!mustGuaranteeMeaningful || IsMeaningfulChoice(move))
                 fallback.Add(move);
         }
 
         if (fallback.Count > 0)
             return fallback[Random.Range(0, fallback.Count)];
+
+        for (int i = 0; i < playerRoundPool.Count; i++)
+        {
+            if (i == excludedIndex)
+                continue;
+
+            MoveType move = playerRoundPool[i];
+            if (!hasDifferentTypeAlternative || move != firstMove)
+                return move;
+        }
 
         for (int i = 0; i < playerRoundPool.Count; i++)
         {
@@ -1911,6 +1942,45 @@ public class AutoBattleController : MonoBehaviour
         if (slot.enemyAttackKind == AttackKind.Technique)
             enemyLabel += $" ({slot.enemyTechniqueType})";
         return $"Слот {slot.slotIndex + 1}: {playerLabel} vs {enemyLabel}";
+    }
+
+
+    public void SetupExternalBattle(BattleLaunchData data)
+    {
+        if (data == null)
+            return;
+
+        if (playerStats != null)
+            playerStats.ApplyExternalConfig(data.player);
+
+        if (enemyStats != null)
+            enemyStats.ApplyExternalConfig(data.enemy);
+
+        ResetBattle();
+    }
+
+    public void StopBattleForHub()
+    {
+        StopAllCoroutines();
+
+        isBusy = false;
+        battleFinished = false;
+        currentSlotActive = false;
+        currentImpactResolved = false;
+        currentBlockCenterSpawned = false;
+        revealEnemyFullQueue = false;
+
+        playerQueue.Clear();
+        enemyQueue.Clear();
+        playerRoundPool.Clear();
+        originalPlayerRoundPool.Clear();
+        currentOffer.Clear();
+
+        if (resultPanel != null)
+            resultPanel.SetActive(false);
+
+        RefreshUI();
+        RefreshButtonStates();
     }
 
 }
