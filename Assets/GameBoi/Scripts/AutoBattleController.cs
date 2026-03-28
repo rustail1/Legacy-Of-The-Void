@@ -193,6 +193,7 @@ public class AutoBattleController : MonoBehaviour
     private readonly List<MoveType> playerQueue = new List<MoveType>();
     private readonly List<MoveType> enemyQueue = new List<MoveType>();
     private readonly List<MoveType> playerRoundPool = new List<MoveType>();
+    private readonly List<MoveType> originalPlayerRoundPool = new List<MoveType>();
     private readonly List<MoveType> currentOffer = new List<MoveType>();
 
     private bool clearUsedThisRound;
@@ -363,6 +364,8 @@ public class AutoBattleController : MonoBehaviour
     private void GeneratePlayerRoundPool()
     {
         playerRoundPool.Clear();
+        originalPlayerRoundPool.Clear();
+
         int[] shape = PickPoolShape(EnemyArchetype.Chaotic, false);
         MoveType[] types = ShuffleMoves(new[] { MoveType.Hand, MoveType.Leg, MoveType.Sword, MoveType.Palm });
 
@@ -371,6 +374,8 @@ public class AutoBattleController : MonoBehaviour
             for (int k = 0; k < shape[i]; k++)
                 playerRoundPool.Add(types[i]);
         }
+
+        originalPlayerRoundPool.AddRange(playerRoundPool);
     }
 
     private void GenerateEnemyQueue()
@@ -513,9 +518,14 @@ public class AutoBattleController : MonoBehaviour
         PlayOneShot(uiClickSfx);
 
         MoveType selected = currentOffer[offerIndex];
-        playerQueue.Add(selected);
-        RemoveFirstOccurrence(playerRoundPool, selected);
 
+        // New round rule:
+        // after choosing 1 of 2, both offered cards leave the round pool.
+        // only the chosen card is added to the player's final queue.
+        for (int i = 0; i < currentOffer.Count; i++)
+            RemoveFirstOccurrence(playerRoundPool, currentOffer[i]);
+
+        playerQueue.Add(selected);
         currentOffer.Clear();
 
         if (playerQueue.Count < rules.slotCount)
@@ -697,12 +707,18 @@ public class AutoBattleController : MonoBehaviour
 
         PlayOneShot(uiClickSfx);
 
-        for (int i = 0; i < playerQueue.Count; i++)
-            playerRoundPool.Add(playerQueue[i]);
+        // New clear rule:
+        // restore the same original 10-card round pool snapshot,
+        // do NOT generate a new round, and do NOT lose cards that were shown earlier.
+        playerRoundPool.Clear();
+        playerRoundPool.AddRange(originalPlayerRoundPool);
 
         playerQueue.Clear();
         currentOffer.Clear();
+
         clearUsedThisRound = true;
+        offersShownThisRound = 0;
+        meaningfulOffersShownInProtectedWindow = 0;
 
         BuildNextPlayerOffer(true);
         RefreshUI();
