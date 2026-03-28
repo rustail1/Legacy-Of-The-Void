@@ -65,11 +65,11 @@ public static class BattleResolver
 
             AttackPlan playerAttack = BuildAttackPlan(playerQueue, i, playerQi, playerStats, rules);
             if (playerAttack.attackKind == AttackKind.Technique)
-                playerQi = Mathf.Max(0, playerQi - rules.techniqueCost);
+                playerQi = Mathf.Max(0, playerQi - rules.GetTechniqueQiCost(playerAttack.techniqueType));
 
             AttackPlan enemyAttack = BuildAttackPlan(enemyQueue, i, enemyQi, enemyStats, rules);
             if (enemyAttack.attackKind == AttackKind.Technique)
-                enemyQi = Mathf.Max(0, enemyQi - rules.techniqueCost);
+                enemyQi = Mathf.Max(0, enemyQi - rules.GetTechniqueQiCost(enemyAttack.techniqueType));
 
             ExchangeType exchangeType;
             WinnerSide winner;
@@ -146,7 +146,7 @@ public static class BattleResolver
             AttackPlan plan = BuildAttackPlan(queue, i, qi, stats, rules);
             plans.Add(plan);
             if (plan.attackKind == AttackKind.Technique)
-                qi = Mathf.Max(0, qi - rules.techniqueCost);
+                qi = Mathf.Max(0, qi - rules.GetTechniqueQiCost(plan.techniqueType));
         }
 
         return plans;
@@ -161,7 +161,12 @@ public static class BattleResolver
                         queue[index] == queue[index - 1] &&
                         queue[index] == queue[index - 2];
 
-        if (hasCombo && currentQi >= rules.techniqueCost && stats.IsTechniqueUnlocked(techniqueType))
+        int techniqueCost = rules.GetTechniqueQiCost(techniqueType);
+
+        if (hasCombo &&
+            currentQi >= techniqueCost &&
+            stats.IsTechniqueUnlocked(techniqueType) &&
+            stats.IsTechniqueAllowedByTier(techniqueType))
         {
             return new AttackPlan
             {
@@ -189,12 +194,12 @@ public static class BattleResolver
             : stats.PartialDamage;
 
         if (attack.attackKind == AttackKind.Technique)
-            return Mathf.RoundToInt(normalDamage * Mathf.Max(0f, rules.techniqueDamageMultiplier));
+            return Mathf.RoundToInt(normalDamage * Mathf.Max(0f, rules.GetTechniqueDamageMultiplier(attack.techniqueType)));
 
         return normalDamage;
     }
 
-    private static TechniqueType MapTechnique(MoveType moveType)
+private static TechniqueType MapTechnique(MoveType moveType)
     {
         switch (moveType)
         {

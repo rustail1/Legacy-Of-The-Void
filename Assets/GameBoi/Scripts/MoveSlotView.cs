@@ -31,6 +31,8 @@ public class MoveSlotView : MonoBehaviour
     [SerializeField] private Color techniqueColor = new Color(1f, 0.9f, 0.45f, 1f);
     [SerializeField] private Color emptyColor = new Color(1f, 1f, 1f, 0.25f);
     [SerializeField] private Color emptyIconColor = new Color(1f, 1f, 1f, 0f);
+    [SerializeField] private Color hiddenColor = new Color(0.35f, 0.35f, 0.35f, 0.8f);
+    [SerializeField] private Color hiddenIconColor = new Color(1f, 1f, 1f, 0f);
     [SerializeField] private Color flashColor = new Color(1f, 1f, 1f, 0.8f);
     [SerializeField] private float flashDuration = 0.18f;
 
@@ -64,6 +66,34 @@ public class MoveSlotView : MonoBehaviour
         {
             techniqueIconImage.enabled = isTechnique;
             techniqueIconImage.sprite = isTechnique ? GetTechniqueSprite(techniqueType) : null;
+        }
+    }
+
+    public void SetHidden()
+    {
+        if (label != null)
+            label.text = "?";
+
+        if (backgroundImage != null)
+            backgroundImage.color = hiddenColor;
+
+        if (moveIconImage != null)
+        {
+            moveIconImage.sprite = null;
+            moveIconImage.enabled = false;
+            moveIconImage.color = hiddenIconColor;
+        }
+
+        if (techniqueBadgeRoot != null)
+            techniqueBadgeRoot.SetActive(false);
+
+        if (techniqueNameLabel != null)
+            techniqueNameLabel.text = string.Empty;
+
+        if (techniqueIconImage != null)
+        {
+            techniqueIconImage.enabled = false;
+            techniqueIconImage.sprite = null;
         }
     }
 

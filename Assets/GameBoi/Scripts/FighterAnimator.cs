@@ -294,8 +294,10 @@ public class FighterAnimator : MonoBehaviour
         switch (CurrentMove)
         {
             case MoveType.Hand:
+                point = handFxPoint != null ? handFxPoint : handPalmFxPoint;
+                break;
             case MoveType.Palm:
-                point = handPalmFxPoint;
+                point = palmFxPoint != null ? palmFxPoint : handPalmFxPoint;
                 break;
             case MoveType.Leg:
                 point = legFxPoint;
