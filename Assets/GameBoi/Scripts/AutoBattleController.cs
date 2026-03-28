@@ -297,6 +297,7 @@ public class AutoBattleController : MonoBehaviour
         playerPendingDamageFx = PendingDamageFxKind.None;
         enemyPendingDamageFx = PendingDamageFxKind.None;
         Time.timeScale = 1f;
+        ClearFloatingCombatTexts();
 
         playerQueue.Clear();
         enemyQueue.Clear();
@@ -1801,6 +1802,17 @@ public class AutoBattleController : MonoBehaviour
         slots[index].PlayTechniqueFlash();
     }
 
+    private void ClearFloatingCombatTexts()
+    {
+        if (floatingDamageRoot == null)
+            return;
+
+        for (int i = floatingDamageRoot.childCount - 1; i >= 0; i--)
+        {
+            Destroy(floatingDamageRoot.GetChild(i).gameObject);
+        }
+    }
+
     private void SetBar(Image fillImage, int current, int max)
     {
         if (fillImage == null)
@@ -1975,6 +1987,8 @@ public class AutoBattleController : MonoBehaviour
         playerRoundPool.Clear();
         originalPlayerRoundPool.Clear();
         currentOffer.Clear();
+
+        ClearFloatingCombatTexts();
 
         if (resultPanel != null)
             resultPanel.SetActive(false);

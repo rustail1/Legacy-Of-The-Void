@@ -33037,7 +33037,7 @@ MonoBehaviour:
   autoBattleController: {fileID: 1443270448}
   battleData:
     player:
-      rank: 1
+      rank: 0
       useManualStats: 0
       bodyLevel: 0
       qiLevel: 0
